@@ -1,48 +1,64 @@
-import { Router } from "express";
+import express from 'express';
+import Todo from '../../models/todoModel.js';
 
-const router = Router();
+const router = express.Router();
 
-let todos = [
-  { id: 1, text: "Lær Node.js" },
-  { id: 2, text: "Lav en god to-do liste" }
-];
-
-// GET – Hent alle todos
-router.get("/", (req, res) => {
-  res.send({ data: todos });
+// GET – hent alle todos
+router.get('/', async (req, res) => {
+  try {
+    const todos = await Todo.find().sort({ createdAt: -1 });
+    res.json(todos);
+  } catch (err) {
+    res.status(500).json({ message: 'Fejl ved hentning af todos' });
+  }
 });
 
-// POST – Tilføj ny todo
-router.post("/", (req, res) => {
-  const { text } = req.body;
-  if (!text) return res.status(400).send({ success: false, message: "Mangler tekst" });
+// POST – opret ny todo
+router.post('/', async (req, res) => {
+  try {
+    const { title, completed = false, dueDate } = req.body;
 
-  const newTodo = { id: Date.now(), text };
-  todos.push(newTodo);
-  res.status(201).send({ success: true, data: newTodo });
+    // Valider at både title og dueDate findes
+    if (!title || !dueDate) {
+      return res.status(400).json({ message: 'Title og dueDate er påkrævet' });
+    }
+
+    const todo = new Todo({
+      title,
+      completed,
+      dueDate
+    });
+
+    const savedTodo = await todo.save();
+    res.status(201).json(savedTodo);
+  } catch (err) {
+    console.error("Fejl ved POST /todos:", err);
+    res.status(400).json({ message: 'Fejl ved oprettelse' });
+  }
 });
 
-// PUT – Rediger todo
-router.put("/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const { text } = req.body;
-  const todo = todos.find(t => t.id === id);
-
-  if (!todo) return res.status(404).send({ success: false, message: "Todo ikke fundet" });
-
-  todo.text = text;
-  res.send({ success: true, data: todo });
+// PUT – opdater eksisterende todo
+router.put('/:id', async (req, res) => {
+  try {
+    const updated = await Todo.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true }
+    );
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ message: 'Fejl ved opdatering' });
+  }
 });
 
-// DELETE – Slet todo
-router.delete("/:id", (req, res) => {
-  const id = Number(req.params.id);
-  const index = todos.findIndex(t => t.id === id);
-
-  if (index === -1) return res.status(404).send({ success: false, message: "Todo ikke fundet" });
-
-  todos.splice(index, 1);
-  res.send({ success: true });
+// DELETE – slet todo
+router.delete('/:id', async (req, res) => {
+  try {
+    await Todo.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Todo slettet' });
+  } catch (err) {
+    res.status(500).json({ message: 'Fejl ved sletning' });
+  }
 });
 
 export default router;
