@@ -25,3 +25,11 @@ export function getTodoPage(todoContentHtml, dynamicOptions = {}) {
     cssLinks: `<link rel="stylesheet" href="../assets/css/todo.css">`
   });
 };
+// Kalender side
+export function getCalendarPage(calendarContentHtml, dynamicOptions = {}) {
+  return constructPage(calendarContentHtml, {
+    title: dynamicOptions.title || "Kalender",
+    cssLinks: getCommonCssLinks(),
+    cssLinks: `<link rel="stylesheet" href="../assets/css/calendar.css">`
+  });
+};
