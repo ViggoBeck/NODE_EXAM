@@ -34,31 +34,42 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         const event = info.event;
         const id = event.id;
+
         titleInput.value = event.title;
         dateInput.value = new Date(event.start).toISOString().slice(0, 16);
 
-        modal.style.display = "block";
+        // Vis modal
+        modal.classList.remove("hidden");
 
+        // Gem ændringer
         saveBtn.onclick = async () => {
           const updatedTitle = titleInput.value;
           const updatedDate = dateInput.value;
 
           try {
             await updateTodo(id, { title: updatedTitle, dueDate: updatedDate });
-            modal.style.display = "none";
+            modal.classList.add("hidden");
             location.reload();
           } catch (err) {
             console.error("Fejl ved opdatering:", err);
           }
         };
 
+        // Slet opgave
         deleteBtn.onclick = async () => {
           try {
             await deleteTodo(id);
-            modal.style.display = "none";
+            modal.classList.add("hidden");
             location.reload();
           } catch (err) {
             console.error("Fejl ved sletning:", err);
+          }
+        };
+
+        // Luk ved klik udenfor modal-indhold
+        modal.onclick = function (e) {
+          if (e.target === modal) {
+            modal.classList.add("hidden");
           }
         };
       }
@@ -68,5 +79,13 @@ document.addEventListener("DOMContentLoaded", async function () {
   } catch (err) {
     console.error("Fejl ved hentning af opgaver til kalender:", err);
     calendarEl.innerHTML = "<p>Kunne ikke indlæse kalenderdata</p>";
+  }
+
+  // Ekstra luk-knap hvis du tilføjer den i HTML
+  const closeBtn = document.getElementById("modal-close");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      document.getElementById("calendar-modal").classList.add("hidden");
+    });
   }
 });
