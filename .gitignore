@@ -1,2 +1,19 @@
+<<<<<<< HEAD
 .env
 node_modules/
+=======
+# macOS system files
+.DS_Store
+
+# VSCode
+.vscode/
+
+# Node modules
+node_modules/
+
+# Env files
+.env
+
+# Logs
+*.log
+>>>>>>> master
