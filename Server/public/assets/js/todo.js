@@ -1,4 +1,4 @@
-import { fetchTodos, createTodo, updateTodo, deleteTodo } from './api.js';
+import { fetchTodos, createTodo, updateTodo, deleteTodo } from './fetch/todoApi.js';
 
 // DOM-elementer
 const inputBox = document.getElementById("input-box");

@@ -1,5 +1,12 @@
 import { Router } from "express";
-import { frontpagePage, getCalendarPage, getTodoPage } from "../util/pages.js";
+import {
+  frontpagePage,
+  getCalendarPage,
+  getTodoPage,
+  getLoginPage,
+  getSignupPage
+} from "../util/pages.js";
+
 import { readPage } from "../util/templatingEngine.js";
 
 const router = Router();
@@ -12,18 +19,23 @@ router.get("/", (req, res) => {
 // To-do side
 router.get("/todos", (req, res) => {
   const todoHtml = readPage("./public/pages/todo/todo.html");
-  const todosPage = getTodoPage(todoHtml, {
-    title: "Min To-do liste"
-  });
-  res.send(todosPage);
+  res.send(getTodoPage(todoHtml, { title: "Min To-do liste" }));
 });
 
-router.get("/calendars", (req, res)=>{
+// Kalender side
+router.get("/calendars", (req, res) => {
   const calendarHtml = readPage("./public/pages/calendar/calendar.html");
-  const calendarsPage = getCalendarPage(calendarHtml, {
-    title: "Min Kalender"
-  });
-  res.send(calendarsPage);
+  res.send(getCalendarPage(calendarHtml, { title: "Min Kalender" }));
+});
+
+// Login side
+router.get("/login", (req, res) => {
+  res.send(getLoginPage());
+});
+
+// Signup side
+router.get("/signup", (req, res) => {
+  res.send(getSignupPage());
 });
 
 export default router;
