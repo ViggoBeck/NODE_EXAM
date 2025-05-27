@@ -2,23 +2,21 @@ import 'dotenv/config';
 import express from 'express';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
-import mongoose from 'mongoose';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
+import connectToDatabase from './database/connection.js';
 import authRouter from './routers/api/authRouter.js';
 import todosRouter from './routers/api/todosRouter.js';
 import pagesRouter from './routers/pagesRouter.js';
-import { protectRoute } from './middleware/authMiddleware.js';
+import { protectRoute } from './middleware/protectRouter.js';
 
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch(err => console.error("MongoDB error", err));
+// DB-forbindelse
+await connectToDatabase();
 
 // Sessions
 app.use(session({
@@ -40,12 +38,15 @@ app.use(session({
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Public auth routes
+// Public API
 app.use('/api/auth', authRouter);
 
-// Beskyt alle sider og API'er
-app.use('/', protectRoute, pagesRouter);
+app.get('/login', (req, res) => res.send(pagesRouter.handleLogin()));
+app.get('/signup', (req, res) => res.send(pagesRouter.handleSignup()));
+
+// Beskyttede API og sider
 app.use('/api/todos', protectRoute, todosRouter);
+app.use('/', protectRoute, pagesRouter);
 
 // Server
 const PORT = process.env.PORT || 8080;

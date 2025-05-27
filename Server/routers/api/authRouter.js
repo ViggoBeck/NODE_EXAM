@@ -1,6 +1,7 @@
 import express from "express";
 import User from "../../models/userModel.js";
 
+
 const router = express.Router();
 
 //Signup 
@@ -23,17 +24,24 @@ router.post("/signup", async (req, res) => {
 });
 
 //Login 
-router.post("/login", async (req, res) => {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-
-    if (!user || !(await user.comparePassword(password))) {
-        return res.status(400).json({ message: "Forkert email eller adgangskode" });
+router.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username });
+  
+    if (!user) {
+      return res.status(401).json({ message: 'Bruger ikke fundet' });
     }
-    
-    req.session.userId = user._id;
-    res.json({ message: "Logget ind" });
+  
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Forkert adgangskode' });
+    }
+  
+    req.session.user = user._id; 
+    res.json({ message: 'Logget ind' });
 });
+  
+  
 
 //Logout
 router.post("/logout", (req, res) => {

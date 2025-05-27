@@ -1,4 +1,4 @@
-import { fetchTodos, updateTodo, deleteTodo } from './fetch/todoApi.js';
+import { fetchTodos, updateTodo, deleteTodo } from '../todo/todoApi.js';
 
 document.addEventListener("DOMContentLoaded", async function () {
   const calendarEl = document.getElementById("calendar");

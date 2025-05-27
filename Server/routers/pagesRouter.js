@@ -27,15 +27,9 @@ router.get("/calendars", (req, res) => {
   const calendarHtml = readPage("./public/pages/calendar/calendar.html");
   res.send(getCalendarPage(calendarHtml, { title: "Min Kalender" }));
 });
-
 // Login side
-router.get("/login", (req, res) => {
-  res.send(getLoginPage());
-});
+router.handleLogin = () => getLoginPage();
 
-// Signup side
-router.get("/signup", (req, res) => {
-  res.send(getSignupPage());
-});
+router.handleSignup = () => getSignupPage();
 
 export default router;
