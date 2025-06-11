@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
-import session from 'express-session';
-import MongoStore from 'connect-mongo';
+import cookieParser from 'cookie-parser'; 
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -18,33 +17,21 @@ const __dirname = path.dirname(__filename);
 // DB-forbindelse
 await connectToDatabase();
 
-// Sessions
-app.use(session({
-  secret: process.env.SESSION_SECRET || "hemmelig",
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGO_URI,
-    collectionName: 'sessions'
-  }),
-  cookie: {
-    httpOnly: true,
-    secure: false,
-    sameSite: "lax"
-  }
-}));
-
 // Middleware
+app.use(express.urlencoded({ extended: true })); 
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Public API
+
+// Public API-ruter
 app.use('/api/auth', authRouter);
 
+// Åbne sider (ingen beskyttelse)
 app.get('/login', (req, res) => res.send(pagesRouter.handleLogin()));
 app.get('/signup', (req, res) => res.send(pagesRouter.handleSignup()));
 
-// Beskyttede API og sider
+// Beskyttede API og sider (JWT via protectRoute)
 app.use('/api/todos', protectRoute, todosRouter);
 app.use('/', protectRoute, pagesRouter);
 

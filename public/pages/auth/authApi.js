@@ -1,4 +1,4 @@
-const API_BASE_URL = '/api/auth';
+const API_BASE_URL = '/api';
 
 // LOGIN
 export async function login(username, password) {
@@ -6,7 +6,7 @@ export async function login(username, password) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
-    credentials: 'include'
+    credentials: 'include' // VIGTIGT for at sende cookies
   });
   return await res.json();
 }
@@ -31,21 +31,3 @@ export async function logout() {
   return await res.json();
 }
 
-// FÆLLES GET (med session)
-export async function fetchGet(url) {
-  const res = await fetch(url, {
-    credentials: 'include'
-  });
-  return await res.json();
-}
-
-// FÆLLES POST (med session)
-export async function fetchPost(url, body) {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify(body)
-  });
-  return await res.json();
-}

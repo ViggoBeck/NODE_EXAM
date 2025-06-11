@@ -10,36 +10,41 @@ function getCommonCssLinks() {
   `;
 }
 
-// Forside
-const frontpage = readPage('./public/pages/frontpage/frontpage.html');
-export const frontpagePage = constructPage(frontpage, {
-  title: 'Forside | To-do App',
-  cssLinks: getCommonCssLinks()
-});
+// Forside (med mulighed for brugerdata)
+export function getFrontpagePage(req) {
+  const frontpage = readPage('./public/pages/frontpage/frontpage.html');
+  return constructPage(frontpage, {
+    title: 'Forside | To-do App',
+    cssLinks: getCommonCssLinks(),
+    username: req.user?.username || ''
+  });
+}
 
 // To-do side
-export function getTodoPage(todoContentHtml, dynamicOptions = {}) {
+export function getTodoPage(req, todoContentHtml, dynamicOptions = {}) {
   return constructPage(todoContentHtml, {
     title: dynamicOptions.title || "To-do Liste",
     cssLinks: `
       ${getCommonCssLinks()}
       <link rel="stylesheet" href="../assets/css/todo.css">
-    `
+    `,
+    username: req.user?.username || ''
   });
 }
 
 // Kalender side
-export function getCalendarPage(calendarContentHtml, dynamicOptions = {}) {
+export function getCalendarPage(req, calendarContentHtml, dynamicOptions = {}) {
   return constructPage(calendarContentHtml, {
     title: dynamicOptions.title || "Kalender",
     cssLinks: `
       ${getCommonCssLinks()}
       <link rel="stylesheet" href="../assets/css/calendar.css">
-    `
+    `,
+    username: req.user?.username || ''
   });
 }
 
-// Login side
+// Login side (ingen brugerinfo)
 export function getLoginPage() {
   const loginHtml = readPage('./public/pages/auth/login.html');
   return constructPage(loginHtml, {
@@ -51,7 +56,7 @@ export function getLoginPage() {
   });
 }
 
-// Signup side
+// Signup side (ingen brugerinfo)
 export function getSignupPage() {
   const signupHtml = readPage('./public/pages/auth/signup.html');
   return constructPage(signupHtml, {

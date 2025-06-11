@@ -1,11 +1,11 @@
 import jwt from "jsonwebtoken";
 
-export function protectRoute(req, res, next) {
+export function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader?.split(' ')[1] || req.cookies?.token;
 
   if (!token) {
-    return res.redirect('/login');
+    return res.status(401).json({ message: 'Adgang nægtet – ingen token' });
   }
 
   try {
@@ -13,7 +13,6 @@ export function protectRoute(req, res, next) {
     req.user = decoded; 
     next();
   } catch (err) {
-    console.error('Ugyldig token:', err.message);
-    return res.redirect('/login');
+    return res.status(403).json({ message: 'Ugyldig token' });
   }
 }

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {
-  frontpagePage,
+  getFrontpagePage,
   getCalendarPage,
   getTodoPage,
   getLoginPage,
@@ -11,25 +11,25 @@ import { readPage } from "../util/templatingEngine.js";
 
 const router = Router();
 
-// Forside
+// Forside (dynamisk med req.user)
 router.get("/", (req, res) => {
-  res.send(frontpagePage);
+  res.send(getFrontpagePage(req));
 });
 
-// To-do side
+// To-do side (med brugerdata)
 router.get("/todos", (req, res) => {
   const todoHtml = readPage("./public/pages/todo/todo.html");
-  res.send(getTodoPage(todoHtml, { title: "Min To-do liste" }));
+  res.send(getTodoPage(req, todoHtml, { title: "Min To-do liste" }));
 });
 
-// Kalender side
+// Kalender side (med brugerdata)
 router.get("/calendars", (req, res) => {
   const calendarHtml = readPage("./public/pages/calendar/calendar.html");
-  res.send(getCalendarPage(calendarHtml, { title: "Min Kalender" }));
+  res.send(getCalendarPage(req, calendarHtml, { title: "Min Kalender" }));
 });
-// Login side
-router.handleLogin = () => getLoginPage();
 
+// Login & Signup 
+router.handleLogin = () => getLoginPage();
 router.handleSignup = () => getSignupPage();
 
 export default router;
