@@ -10,7 +10,7 @@ function getCommonCssLinks() {
   `;
 }
 
-// Forside (med mulighed for brugerdata)
+// Forside
 export function getFrontpagePage(req) {
   const frontpage = readPage('./public/pages/frontpage/frontpage.html');
   return constructPage(frontpage, {
@@ -44,7 +44,7 @@ export function getCalendarPage(req, calendarContentHtml, dynamicOptions = {}) {
   });
 }
 
-// Login side (ingen brugerinfo)
+// Login side
 export function getLoginPage() {
   const loginHtml = readPage('./public/pages/auth/login.html');
   return constructPage(loginHtml, {
@@ -56,7 +56,7 @@ export function getLoginPage() {
   });
 }
 
-// Signup side (ingen brugerinfo)
+// Signup side
 export function getSignupPage() {
   const signupHtml = readPage('./public/pages/auth/signup.html');
   return constructPage(signupHtml, {

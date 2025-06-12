@@ -22,9 +22,13 @@ export function constructPage(pageContent, options = {}) {
 
   header = header.replace('$USERNAME$', username);
   header = header.replace('$LOGOUT_BUTTON$', isLoggedIn 
-    ? `<form method="POST" action="/api/auth/logout"><button>Log ud</button></form>` 
+    ? `<button id="logout-btn" type="button" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
+        Log ud
+      </button>`
     : ''
   );
+  
+
 
   return header + pageContent + footer;
 }

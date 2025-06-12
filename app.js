@@ -9,6 +9,7 @@ import authRouter from './routers/api/authRouter.js';
 import todosRouter from './routers/api/todosRouter.js';
 import pagesRouter from './routers/pagesRouter.js';
 import { protectRoute } from './middleware/protectRouter.js';
+import { attachUserToken } from './middleware/attachUserToken.js';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -21,21 +22,19 @@ await connectToDatabase();
 app.use(express.urlencoded({ extended: true })); 
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(attachUserToken); // Tilføjer req.user hvis token findes
+app.use(express.static(path.join(__dirname, 'public'))); // Serverer frontend-filer
 
 // Public API-ruter
 app.use('/api/auth', authRouter);
 
-// Åbne sider (ingen beskyttelse)
-app.get('/login', (req, res) => res.send(pagesRouter.handleLogin()));
-app.get('/signup', (req, res) => res.send(pagesRouter.handleSignup()));
-
-// Beskyttede API og sider (JWT via protectRoute)
+// Beskyttet API (kræver JWT-token)
 app.use('/api/todos', protectRoute, todosRouter);
-app.use('/', protectRoute, pagesRouter);
 
-// Server
+// Alle sider — beskyttelse håndteres *internt* i pagesRouter
+app.use('/', pagesRouter);
+
+// Start server
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);

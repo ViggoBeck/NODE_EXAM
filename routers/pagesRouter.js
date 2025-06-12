@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { protectRoute } from "../middleware/protectRouter.js";
 import {
   getFrontpagePage,
   getCalendarPage,
@@ -11,25 +12,35 @@ import { readPage } from "../util/templatingEngine.js";
 
 const router = Router();
 
-// Forside (dynamisk med req.user)
-router.get("/", (req, res) => {
+/* -------- PUBLIC ROUTES -------- */
+
+// Login
+router.get("/login", (req, res) => {
+  res.send(getLoginPage(req));
+});
+
+// Signup
+router.get("/signup", (req, res) => {
+  res.send(getSignupPage(req));
+});
+
+/* -------- PROTECTED ROUTES -------- */
+
+// Forside (kun hvis logget ind)
+router.get("/", protectRoute, (req, res) => {
   res.send(getFrontpagePage(req));
 });
 
-// To-do side (med brugerdata)
-router.get("/todos", (req, res) => {
+// To-do side
+router.get("/todos", protectRoute, (req, res) => {
   const todoHtml = readPage("./public/pages/todo/todo.html");
   res.send(getTodoPage(req, todoHtml, { title: "Min To-do liste" }));
 });
 
-// Kalender side (med brugerdata)
-router.get("/calendars", (req, res) => {
+// Kalender side
+router.get("/calendars", protectRoute, (req, res) => {
   const calendarHtml = readPage("./public/pages/calendar/calendar.html");
   res.send(getCalendarPage(req, calendarHtml, { title: "Min Kalender" }));
 });
-
-// Login & Signup 
-router.handleLogin = () => getLoginPage();
-router.handleSignup = () => getSignupPage();
 
 export default router;

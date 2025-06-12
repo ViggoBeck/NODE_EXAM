@@ -1,9 +1,8 @@
 import { login, signup, logout } from './authApi.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Login
   const loginForm = document.querySelector('#login-form');
-  const signupForm = document.querySelector('#signup-form');
-
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -20,6 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Signup
+  const signupForm = document.querySelector('#signup-form');
   if (signupForm) {
     signupForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -37,13 +38,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  //logout-knap
+  // Logout
   const logoutBtn = document.querySelector('#logout-btn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
-      await logout();
-      window.location.href = '/login';
+      try {
+        const res = await logout();
+        console.log(res.message);
+        window.location.href = '/login'; 
+      } catch (err) {
+        console.error('Fejl ved logout:', err);
+      }
     });
   }
 });
-

@@ -173,3 +173,20 @@ ul li.checked::before {
   color: #888;
   margin-left: 8px;
 }
+
+.dashboard {
+  padding: 2rem;
+  text-align: center;
+}
+
+.button-group .btn {
+  padding: 10px 20px;
+  background-color: #4b5563;
+  color: white;
+  border-radius: 0.5rem;
+  text-decoration: none;
+}
+
+.button-group .btn:hover {
+  background-color: #374151;
+}
