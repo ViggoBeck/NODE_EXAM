@@ -1,7 +1,7 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import User from "../../models/userModel.js";
+import User from "../models/userModel.js";
 // import { sendSignupEmail } from "../../utils/emailService.js"; // senere
 
 const router = express.Router();

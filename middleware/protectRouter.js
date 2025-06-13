@@ -1,19 +1,6 @@
-import jwt from "jsonwebtoken";
-
 export function protectRoute(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader?.split(' ')[1] || req.cookies?.token;
-
-  if (!token) {
+  if (!req.user) {
     return res.redirect('/login');
   }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; 
-    next();
-  } catch (err) {
-    console.error('Ugyldig token:', err.message);
-    return res.redirect('/login');
-  }
+  next();
 }

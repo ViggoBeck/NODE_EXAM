@@ -5,8 +5,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import connectToDatabase from './database/connection.js';
-import authRouter from './routers/api/authRouter.js';
-import todosRouter from './routers/api/todosRouter.js';
+import authRouter from './routers/authRouter.js';
+import todosRouter from './routers/todosRouter.js';
 import pagesRouter from './routers/pagesRouter.js';
 import { protectRoute } from './middleware/protectRouter.js';
 import { attachUserToken } from './middleware/attachUserToken.js';

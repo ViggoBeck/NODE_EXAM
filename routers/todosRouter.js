@@ -1,12 +1,12 @@
 import express from 'express';
-import Todo from '../../models/todoModel.js';
+import Todo from '../models/todoModel.js';
 
 const router = express.Router();
 
 // GET 
 router.get('/', async (req, res) => {
   try {
-    const todos = await Todo.find({ user: req.user.userId }).sort({ createdAt: -1 });
+    const todos = await Todo.find({ user: req.user._id }).sort({ createdAt: -1 });
     res.json(todos);
   } catch (err) {
     res.status(500).json({ message: 'Fejl ved hentning af todos' });
@@ -25,7 +25,7 @@ router.post('/', async (req, res) => {
       title,
       completed,
       dueDate,
-      user: req.user.userId 
+      user: req.user._id
     });
 
     const savedTodo = await todo.save();
@@ -40,7 +40,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const updated = await Todo.findOneAndUpdate(
-      { _id: req.params.id, user: req.user.userId }, 
+      { _id: req.params.id, user: req.user._id }, 
       { $set: req.body },
       { new: true }
     );
@@ -58,7 +58,7 @@ router.delete('/:id', async (req, res) => {
   try {
     const deleted = await Todo.findOneAndDelete({
       _id: req.params.id,
-      user: req.user.userId 
+      user: req.user._id
     });
 
     if (!deleted) return res.status(403).json({ message: 'Ingen adgang' });

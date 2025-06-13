@@ -12,34 +12,34 @@ function getCommonCssLinks() {
 
 // Forside
 export function getFrontpagePage(req) {
-  const frontpage = readPage('./public/pages/frontpage/frontpage.html');
+  let frontpage = readPage('./public/pages/frontpage/frontpage.html');
+  const username = req.user?.username || '';
+
+  frontpage = frontpage.replace('$USERNAME$', username);
+
   return constructPage(frontpage, {
     title: 'Forside | To-do App',
     cssLinks: getCommonCssLinks(),
-    username: req.user?.username || ''
+    username
   });
 }
 
 // To-do side
-export function getTodoPage(req, todoContentHtml, dynamicOptions = {}) {
-  return constructPage(todoContentHtml, {
-    title: dynamicOptions.title || "To-do Liste",
-    cssLinks: `
-      ${getCommonCssLinks()}
-      <link rel="stylesheet" href="../assets/css/todo.css">
-    `,
+export function getTodoPage(req) {
+  const todoContent = readPage('./public/pages/todo/todo.html');
+  return constructPage(todoContent, {
+    title: 'Min To-do liste',
+    cssLinks: getCommonCssLinks() + `<link rel="stylesheet" href="/assets/css/todo.css">`,
     username: req.user?.username || ''
   });
 }
 
 // Kalender side
-export function getCalendarPage(req, calendarContentHtml, dynamicOptions = {}) {
-  return constructPage(calendarContentHtml, {
-    title: dynamicOptions.title || "Kalender",
-    cssLinks: `
-      ${getCommonCssLinks()}
-      <link rel="stylesheet" href="../assets/css/calendar.css">
-    `,
+export function getCalendarPage(req) {
+  const calendarContent = readPage('./public/pages/calendar/calendar.html');
+  return constructPage(calendarContent, {
+    title: 'Min Kalender',
+    cssLinks: getCommonCssLinks() + `<link rel="stylesheet" href="/assets/css/calendar.css">`,
     username: req.user?.username || ''
   });
 }
@@ -49,10 +49,7 @@ export function getLoginPage() {
   const loginHtml = readPage('./public/pages/auth/login.html');
   return constructPage(loginHtml, {
     title: 'Login | To-do App',
-    cssLinks: `
-      ${getCommonCssLinks()}
-      <link rel="stylesheet" href="../assets/css/login.css">
-    `
+    cssLinks: getCommonCssLinks() + `<link rel="stylesheet" href="/assets/css/login.css">`
   });
 }
 
@@ -61,9 +58,6 @@ export function getSignupPage() {
   const signupHtml = readPage('./public/pages/auth/signup.html');
   return constructPage(signupHtml, {
     title: 'Opret Bruger | To-do App',
-    cssLinks: `
-      ${getCommonCssLinks()}
-      <link rel="stylesheet" href="../assets/css/login.css">
-    `
+    cssLinks: getCommonCssLinks() + `<link rel="stylesheet" href="/assets/css/login.css">`
   });
 }
