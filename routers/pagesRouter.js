@@ -5,7 +5,8 @@ import {
   getCalendarPage,
   getTodoPage,
   getLoginPage,
-  getSignupPage
+  getSignupPage,
+  getFriendsPage
 } from "../util/pages.js";
 
 import { readPage } from "../util/templatingEngine.js";
@@ -41,6 +42,10 @@ router.get("/todos", protectRoute, (req, res) => {
 router.get("/calendars", protectRoute, (req, res) => {
   const calendarHtml = readPage("./public/pages/calendar/calendar.html");
   res.send(getCalendarPage(req, calendarHtml, { title: "Min Kalender" }));
+});
+
+router.get('/venner', protectRoute, (req, res) => {
+  res.send(getFriendsPage(req));
 });
 
 export default router;

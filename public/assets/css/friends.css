@@ -1,0 +1,55 @@
+.friends-page #friend-list,
+.friends-page #requests-section,
+.friends-page #search-section {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.friends-page h2 {
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.friends-page ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.friends-page li {
+  background: white;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ddd;
+}
+
+.friends-page button {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.friends-page button:hover {
+  background-color: #4338ca;
+}
+
+.friends-page input#search-username {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0.6rem;
+  font-size: 1rem;
+}
+
+.friends-page #search-message {
+  font-style: italic;
+  color: #666;
+}

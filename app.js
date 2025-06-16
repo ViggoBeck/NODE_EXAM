@@ -8,6 +8,7 @@ import connectToDatabase from './database/connection.js';
 import authRouter from './routers/authRouter.js';
 import todosRouter from './routers/todosRouter.js';
 import pagesRouter from './routers/pagesRouter.js';
+import friendsRouter from './routers/friendsRouter.js';
 import { protectRoute } from './middleware/protectRouter.js';
 import { attachUserToken } from './middleware/attachUserToken.js';
 
@@ -30,6 +31,7 @@ app.use('/api/auth', authRouter);
 
 // Beskyttet API (kræver JWT-token)
 app.use('/api/todos', protectRoute, todosRouter);
+app.use('/api/friends', protectRoute, friendsRouter);
 
 // Alle sider — beskyttelse håndteres *internt* i pagesRouter
 app.use('/', pagesRouter);

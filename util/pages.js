@@ -44,6 +44,15 @@ export function getCalendarPage(req) {
   });
 }
 
+export function getFriendsPage(req) {
+  const friendsHtml = readPage('./public/pages/friends/friends.html');
+  return constructPage(friendsHtml, {
+    title: 'Mine Venner',
+    cssLinks: getCommonCssLinks() + `<link rel="stylesheet" href="/assets/css/friends.css">`,
+    username: req.user?.username || ''
+  });
+}
+
 // Login side
 export function getLoginPage() {
   const loginHtml = readPage('./public/pages/auth/login.html');

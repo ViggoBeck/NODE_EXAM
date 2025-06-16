@@ -22,6 +22,10 @@ const todoSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  sharedWith: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
 });
 
 export default mongoose.model('Todo', todoSchema);

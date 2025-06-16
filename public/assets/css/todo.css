@@ -39,8 +39,9 @@
   justify-content: space-between;
   background: #edeef0;
   border-radius: 30px;
-  padding-left: 20px;
-  margin-bottom: 25px;
+  padding: 10px;
+  gap: 10px;
+  flex-wrap: wrap; 
 }
 
 .todo-app input {
@@ -154,8 +155,6 @@ ul li.checked .text-wrapper {
   box-shadow: 0 0 0 3px rgba(21, 54, 119, 0.2);
 }
 
-
-/* Når todo er completed */
 ul li.checked::before {
   background-image: url(../images/checked.png);
 }
@@ -189,4 +188,18 @@ ul li.checked::before {
 
 .button-group .btn:hover {
   background-color: #374151;
+}
+
+#friend-select {
+  border-radius: 20px;
+  padding: 10px;
+  font-size: 14px;
+  border: none;
+  outline: none;
+  background: white;
+  flex: 1;
+  min-width: 150px;
+  max-width: 220px;
+  color: #333;
+  appearance: none; 
 }
