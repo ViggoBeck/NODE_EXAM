@@ -20,7 +20,8 @@ export function getFrontpagePage(req) {
   return constructPage(frontpage, {
     title: 'Forside | To-do App',
     cssLinks: getCommonCssLinks(),
-    username
+    username,
+    userId: req.user?._id.toString() || ''
   });
 }
 
@@ -30,7 +31,8 @@ export function getTodoPage(req) {
   return constructPage(todoContent, {
     title: 'Min To-do liste',
     cssLinks: getCommonCssLinks() + `<link rel="stylesheet" href="/assets/css/todo.css">`,
-    username: req.user?.username || ''
+    username: req.user?.username || '',
+    userId: req.user?._id.toString() || ''
   });
 }
 
@@ -40,7 +42,8 @@ export function getCalendarPage(req) {
   return constructPage(calendarContent, {
     title: 'Min Kalender',
     cssLinks: getCommonCssLinks() + `<link rel="stylesheet" href="/assets/css/calendar.css">`,
-    username: req.user?.username || ''
+    username: req.user?.username || '',
+    userId: req.user?._id.toString() || ''
   });
 }
 
@@ -49,7 +52,8 @@ export function getFriendsPage(req) {
   return constructPage(friendsHtml, {
     title: 'Mine Venner',
     cssLinks: getCommonCssLinks() + `<link rel="stylesheet" href="/assets/css/friends.css">`,
-    username: req.user?.username || ''
+    username: req.user?.username || '',
+    userId: req.user?._id.toString() || ''
   });
 }
 

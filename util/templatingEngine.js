@@ -9,12 +9,14 @@ const footerTemplate = readPage('./public/components/footer.html');
 
 export function constructPage(pageContent, options = {}) {
   const username = options.username || '';
+  const userId = options.userId || '';
   const isLoggedIn = Boolean(username);
 
   const header = headerTemplate
     .replace('$NAV_TITLE$', options.title || 'To-do App')
     .replace('$CSS_LINKS$', options.cssLinks || '')
     .replace('$USERNAME$', isLoggedIn ? username : '')
+    .replace('$USER_ID$', userId)
     .replace(
       '$LOGOUT_BUTTON$',
       isLoggedIn

@@ -9,8 +9,6 @@ import {
   getFriendsPage
 } from "../util/pages.js";
 
-import { readPage } from "../util/templatingEngine.js";
-
 const router = Router();
 
 /* -------- PUBLIC ROUTES -------- */
@@ -34,17 +32,16 @@ router.get("/", protectRoute, (req, res) => {
 
 // To-do side
 router.get("/todos", protectRoute, (req, res) => {
-  const todoHtml = readPage("./public/pages/todo/todo.html");
-  res.send(getTodoPage(req, todoHtml, { title: "Min To-do liste" }));
+  res.send(getTodoPage(req));
 });
 
 // Kalender side
 router.get("/calendars", protectRoute, (req, res) => {
-  const calendarHtml = readPage("./public/pages/calendar/calendar.html");
-  res.send(getCalendarPage(req, calendarHtml, { title: "Min Kalender" }));
+  res.send(getCalendarPage(req));
 });
 
-router.get('/venner', protectRoute, (req, res) => {
+// Venner side
+router.get("/venner", protectRoute, (req, res) => {
   res.send(getFriendsPage(req));
 });
 

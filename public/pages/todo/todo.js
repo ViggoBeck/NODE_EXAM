@@ -7,6 +7,12 @@ import {
   fetchFriends
 } from './todoFetch.js';
 
+const socket = window.io();
+const userId = document.body.dataset.userId;
+if (userId) {
+  socket.emit("join", userId);
+}
+
 // DOM-elementer
 const inputBox = document.getElementById("input-box");
 const dateInput = document.getElementById("date-input");
@@ -14,7 +20,7 @@ const friendSelect = document.getElementById("friend-select");
 const addButton = document.getElementById("add-button");
 const listContainer = document.getElementById("todo-list-container");
 
-// Fyld venne-dropdown
+// Fyld dropdown med venner
 async function populateFriendDropdown() {
   try {
     const friends = await fetchFriends();
@@ -69,7 +75,7 @@ function createListItem(todo) {
   listContainer.appendChild(li);
 }
 
-// Indlæs todos og vis i listen
+// Hent alle to-dos
 async function loadTodos() {
   try {
     const todos = await fetchTodos();
@@ -81,7 +87,7 @@ async function loadTodos() {
   }
 }
 
-// Tilføj ny todo (og del hvis ven valgt)
+// Tilføj ny to-do
 async function addTask() {
   const title = inputBox.value.trim();
   const dueDate = dateInput.value;
@@ -103,7 +109,6 @@ async function addTask() {
       await shareTodo(newTodo._id, friendId);
     }
 
-    createListItem(newTodo);
     inputBox.value = "";
     dateInput.value = "";
     friendSelect.value = "";
@@ -113,7 +118,7 @@ async function addTask() {
   }
 }
 
-// Klik-håndtering
+// Klikhåndtering
 listContainer.addEventListener("click", async (e) => {
   const li = e.target.closest("li");
   const id = li?.dataset.id;
@@ -170,14 +175,21 @@ listContainer.addEventListener("click", async (e) => {
   }
 });
 
-// Event listeners
+// Events
 addButton.addEventListener("click", addTask);
 inputBox.addEventListener("keypress", (e) => {
   if (e.key === "Enter") addTask();
 });
 
-// Initial indlæsning
+// Init
 document.addEventListener("DOMContentLoaded", () => {
   loadTodos();
   populateFriendDropdown();
+});
+
+// Lyt efter realtidsdata
+socket.on("new-todo", (todo) => {
+  if (!document.querySelector(`li[data-id="${todo._id}"]`)) {
+    createListItem(todo);
+  }
 });

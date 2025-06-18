@@ -1,5 +1,6 @@
 import express from 'express';
 import Todo from '../models/todoModel.js';
+import { io } from '../app.js';
 
 const router = express.Router();
 
@@ -7,16 +8,14 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const todos = await Todo.find({
-      $or: [
-        { user: req.user._id },
-        { sharedWith: req.user._id }
-      ]
+      $or: [{ user: req.user._id }, { sharedWith: req.user._id }]
     })
-    .sort({ createdAt: -1 })
-    .populate('sharedWith', 'username'); // Populér brugernavne for delte brugere
+      .sort({ createdAt: -1 })
+      .populate('sharedWith', 'username');
 
     res.json(todos);
   } catch (err) {
+    console.error("[GET /todos] Fejl:", err);
     res.status(500).json({ message: 'Fejl ved hentning af todos' });
   }
 });
@@ -37,9 +36,12 @@ router.post('/', async (req, res) => {
     });
 
     const savedTodo = await todo.save();
+    await savedTodo.populate('sharedWith', 'username');
+
+    io.to(req.user._id.toString()).emit("new-todo", savedTodo);
     res.status(201).json(savedTodo);
   } catch (err) {
-    console.error("Fejl ved POST /todos:", err);
+    console.error("[POST /todos] Fejl:", err);
     res.status(400).json({ message: 'Fejl ved oprettelse' });
   }
 });
@@ -58,12 +60,14 @@ router.post('/:id/share/:friendId', async (req, res) => {
 
     if (!todo.sharedWith.includes(req.params.friendId)) {
       todo.sharedWith.push(req.params.friendId);
-      await todo.save();
+      const updated = await todo.save();
+      await updated.populate('sharedWith', 'username');
+      io.to(req.params.friendId.toString()).emit("new-todo", updated);
     }
 
     res.json({ message: 'To-do delt med ven' });
   } catch (err) {
-    console.error('Fejl ved deling:', err);
+    console.error('[POST /todos/:id/share] Fejl:', err);
     res.status(500).json({ message: 'Fejl ved deling af to-do' });
   }
 });
@@ -74,29 +78,31 @@ router.put('/:id', async (req, res) => {
     const updated = await Todo.findOneAndUpdate(
       {
         _id: req.params.id,
-        $or: [
-          { user: req.user._id },
-          { sharedWith: req.user._id }
-        ]
+        $or: [{ user: req.user._id }, { sharedWith: req.user._id }]
       },
       { $set: req.body },
       { new: true }
     );
 
-    if (!updated) return res.status(403).json({ message: 'Ingen adgang' });
+    if (!updated) {
+      return res.status(403).json({ message: 'Ingen adgang' });
+    }
 
     res.json(updated);
   } catch (err) {
+    console.error("[PUT /todos/:id] Fejl:", err);
     res.status(400).json({ message: 'Fejl ved opdatering' });
   }
 });
 
-// DELETE 
+// DELETE – ejer og delte brugere kan slette
 router.delete('/:id', async (req, res) => {
   try {
     const todo = await Todo.findById(req.params.id);
 
-    if (!todo) return res.status(404).json({ message: 'To-do ikke fundet' });
+    if (!todo) {
+      return res.status(404).json({ message: 'To-do ikke fundet' });
+    }
 
     const isOwner = todo.user.equals(req.user._id);
     const isSharedWith = todo.sharedWith.includes(req.user._id);
@@ -106,10 +112,9 @@ router.delete('/:id', async (req, res) => {
     }
 
     await todo.deleteOne();
-
     res.json({ message: 'To-do slettet for alle brugere' });
   } catch (err) {
-    console.error('Fejl ved sletning:', err);
+    console.error('[DELETE /todos/:id] Fejl:', err);
     res.status(500).json({ message: 'Fejl ved sletning af to-do' });
   }
 });
