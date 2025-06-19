@@ -1,9 +1,9 @@
-import express from 'express';
+import { Router } from 'express';
 import User from '../models/userModel.js';
 
-const router = express.Router();
+const router = Router();
 
-// Get all friends
+// GET – alle venner
 router.get('/', async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate('friends', 'username');
@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get incoming friend requests
+// GET – indkommende venneanmodninger
 router.get('/requests', async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate('friendRequests', 'username');
@@ -23,13 +23,21 @@ router.get('/requests', async (req, res) => {
   }
 });
 
-// Send friend request
+// POST – send venneanmodning
 router.post('/request/:username', async (req, res) => {
   try {
     const target = await User.findOne({ username: req.params.username });
     if (!target) return res.status(404).json({ message: 'Bruger ikke fundet' });
 
-    if (target.friendRequests.includes(req.user._id) || target.friends.includes(req.user._id)) {
+    // Undgå at sende til sig selv
+    if (target._id.equals(req.user._id)) {
+      return res.status(400).json({ message: 'Du kan ikke sende en anmodning til dig selv' });
+    }
+
+    const alreadyRequested = target.friendRequests.includes(req.user._id);
+    const alreadyFriends = target.friends.includes(req.user._id);
+
+    if (alreadyRequested || alreadyFriends) {
       return res.status(400).json({ message: 'Allerede sendt eller allerede venner' });
     }
 
@@ -42,7 +50,7 @@ router.post('/request/:username', async (req, res) => {
   }
 });
 
-// Accept friend request
+// POST – accepter venneanmodning
 router.post('/accept/:username', async (req, res) => {
   try {
     const requester = await User.findOne({ username: req.params.username });
@@ -54,9 +62,10 @@ router.post('/accept/:username', async (req, res) => {
 
     // Fjern anmodning
     user.friendRequests = user.friendRequests.filter(id => id.toString() !== requester._id.toString());
-    // Tilføj hinanden som venner
-    user.friends.push(requester._id);
-    requester.friends.push(user._id);
+
+    // Tilføj hinanden som venner (dobbeltsidet)
+    if (!user.friends.includes(requester._id)) user.friends.push(requester._id);
+    if (!requester.friends.includes(user._id)) requester.friends.push(user._id);
 
     await user.save();
     await requester.save();
@@ -66,5 +75,45 @@ router.post('/accept/:username', async (req, res) => {
     res.status(500).json({ message: 'Fejl ved accept af anmodning' });
   }
 });
+
+// GET – søgning for brugere
+router.get('/search', async (req, res) => {
+  try {
+    const query = req.query.query;
+    if (!query) return res.json([]);
+
+    const users = await User.find({
+      username: { $regex: query, $options: 'i' },
+      _id: { $ne: req.user._id } // undgå at finde sig selv
+    }).limit(5).select('username');
+
+    res.json(users);
+  } catch (err) {
+    console.error('[GET /friends/search] Fejl:', err);
+    res.status(500).json({ message: 'Fejl ved søgning' });
+  }
+});
+
+// DELETE – fjern en ven
+router.delete('/:username', async (req, res) => {
+  try {
+    const target = await User.findOne({ username: req.params.username });
+    if (!target) return res.status(404).json({ message: 'Bruger ikke fundet' });
+
+    const user = await User.findById(req.user._id);
+
+    user.friends = user.friends.filter(id => id.toString() !== target._id.toString());
+    target.friends = target.friends.filter(id => id.toString() !== user._id.toString());
+
+    await user.save();
+    await target.save();
+
+    res.json({ message: `Du er ikke længere venner med ${target.username}` });
+  } catch (err) {
+    console.error('[DELETE /friends/:username] Fejl:', err);
+    res.status(500).json({ message: 'Fejl ved fjernelse af ven' });
+  }
+});
+
 
 export default router;

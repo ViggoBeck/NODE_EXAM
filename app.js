@@ -51,7 +51,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/todos', protectRoute, todosRouter);
 app.use('/api/friends', protectRoute, friendsRouter);
 
-// Alle sider — beskyttelse håndteres *internt* i pagesRouter
+// Alle sider 
 app.use('/', pagesRouter);
 
 // Start server

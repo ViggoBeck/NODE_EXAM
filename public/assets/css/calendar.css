@@ -1,0 +1,5 @@
+#calendar {
+    height: calc(100vh - 160px);
+    max-width: 100%;
+  }
+  

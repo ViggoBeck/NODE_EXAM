@@ -1,8 +1,8 @@
-import express from 'express';
+import { Router } from 'express';
 import Todo from '../models/todoModel.js';
 import { io } from '../app.js';
 
-const router = express.Router();
+const router = Router();
 
 // GET – hent både egne og delte to-dos
 router.get('/', async (req, res) => {
@@ -10,8 +10,9 @@ router.get('/', async (req, res) => {
     const todos = await Todo.find({
       $or: [{ user: req.user._id }, { sharedWith: req.user._id }]
     })
-      .sort({ createdAt: -1 })
-      .populate('sharedWith', 'username');
+      .sort({ dueDate: 1 })
+      .populate('sharedWith', 'username')
+      .populate('user', 'username');
 
     res.json(todos);
   } catch (err) {
@@ -23,7 +24,8 @@ router.get('/', async (req, res) => {
 // POST – opret ny to-do
 router.post('/', async (req, res) => {
   try {
-    const { title, completed = false, dueDate } = req.body;
+    const { title, completed = false, dueDate, comment = "" } = req.body;
+
     if (!title || !dueDate) {
       return res.status(400).json({ message: 'Title og dueDate er påkrævet' });
     }
@@ -32,14 +34,27 @@ router.post('/', async (req, res) => {
       title,
       completed,
       dueDate,
+      comment,
       user: req.user._id
     });
 
     const savedTodo = await todo.save();
-    await savedTodo.populate('sharedWith', 'username');
+    const populatedTodo = await Todo.findById(savedTodo._id)
+      .populate('sharedWith', 'username')
+      .populate('user', 'username')
+      .lean(); // sikre objekt der kan sendes via socket
 
-    io.to(req.user._id.toString()).emit("new-todo", savedTodo);
-    res.status(201).json(savedTodo);
+    // Emit til ejer
+    io.to(req.user._id.toString()).emit("new-todo", populatedTodo);
+
+    // Emit til alle delte brugere
+    if (populatedTodo.sharedWith?.length > 0) {
+      populatedTodo.sharedWith.forEach(friend => {
+        io.to(friend._id.toString()).emit("new-todo", populatedTodo);
+      });
+    }
+
+    res.status(201).json(populatedTodo);
   } catch (err) {
     console.error("[POST /todos] Fejl:", err);
     res.status(400).json({ message: 'Fejl ved oprettelse' });
@@ -61,8 +76,12 @@ router.post('/:id/share/:friendId', async (req, res) => {
     if (!todo.sharedWith.includes(req.params.friendId)) {
       todo.sharedWith.push(req.params.friendId);
       const updated = await todo.save();
-      await updated.populate('sharedWith', 'username');
-      io.to(req.params.friendId.toString()).emit("new-todo", updated);
+      const populated = await Todo.findById(updated._id)
+        .populate('sharedWith', 'username')
+        .populate('user', 'username')
+        .lean();
+
+      io.to(req.params.friendId.toString()).emit("new-todo", populated);
     }
 
     res.json({ message: 'To-do delt med ven' });

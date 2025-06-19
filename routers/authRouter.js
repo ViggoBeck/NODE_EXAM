@@ -1,10 +1,10 @@
-import express from "express";
+import { Router } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import User from "../models/userModel.js";
 // import { sendSignupEmail } from "../../utils/emailService.js"; // senere
 
-const router = express.Router();
+const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // Signup

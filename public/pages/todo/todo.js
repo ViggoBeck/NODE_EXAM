@@ -13,14 +13,12 @@ if (userId) {
   socket.emit("join", userId);
 }
 
-// DOM-elementer
 const inputBox = document.getElementById("input-box");
 const dateInput = document.getElementById("date-input");
 const friendSelect = document.getElementById("friend-select");
 const addButton = document.getElementById("add-button");
 const listContainer = document.getElementById("todo-list-container");
 
-// Fyld dropdown med venner
 async function populateFriendDropdown() {
   try {
     const friends = await fetchFriends();
@@ -35,11 +33,12 @@ async function populateFriendDropdown() {
   }
 }
 
-// Opret todo-element i DOM
 function createListItem(todo) {
   const li = document.createElement("li");
   li.dataset.id = todo._id;
-  if (todo.completed) li.classList.add("checked");
+
+  li.classList.add("transition-opacity", "duration-1000");
+  if (todo.completed) li.classList.add("checked", "opacity-50", "italic");
 
   const wrapper = document.createElement("div");
   wrapper.classList.add("text-wrapper");
@@ -60,11 +59,18 @@ function createListItem(todo) {
   wrapper.appendChild(date);
   li.appendChild(wrapper);
 
-  if (todo.sharedWith?.length > 0) {
-    const shared = document.createElement("div");
-    shared.className = "shared-label";
-    shared.textContent = "Delt med: " + todo.sharedWith.map(u => u.username).join(", ");
-    li.appendChild(shared);
+  const sharedLabel = document.createElement("div");
+  sharedLabel.className = "shared-label";
+
+  if (todo.user && todo.user._id !== userId) {
+    sharedLabel.textContent = `with: ${todo.user.username}`;
+    li.appendChild(sharedLabel);
+  } else if (todo.sharedWith?.length > 0) {
+    const others = todo.sharedWith.filter(u => u._id !== userId);
+    if (others.length > 0) {
+      sharedLabel.textContent = "with: " + others.map(u => u.username).join(", ");
+      li.appendChild(sharedLabel);
+    }
   }
 
   const deleteBtn = document.createElement("span");
@@ -75,7 +81,6 @@ function createListItem(todo) {
   listContainer.appendChild(li);
 }
 
-// Hent alle to-dos
 async function loadTodos() {
   try {
     const todos = await fetchTodos();
@@ -87,7 +92,6 @@ async function loadTodos() {
   }
 }
 
-// Tilføj ny to-do
 async function addTask() {
   const title = inputBox.value.trim();
   const dueDate = dateInput.value;
@@ -118,7 +122,6 @@ async function addTask() {
   }
 }
 
-// Klikhåndtering
 listContainer.addEventListener("click", async (e) => {
   const li = e.target.closest("li");
   const id = li?.dataset.id;
@@ -165,29 +168,43 @@ listContainer.addEventListener("click", async (e) => {
   }
 
   if (e.target === li) {
-    const isCompleted = !li.classList.contains("checked");
+    const isNowCompleted = !li.classList.contains("checked");
+
     try {
-      await updateTodo(id, { completed: isCompleted });
+      await updateTodo(id, { completed: isNowCompleted });
+
       li.classList.toggle("checked");
+
+      if (isNowCompleted) {
+        li.classList.add("opacity-50", "italic");
+
+        setTimeout(async () => {
+          try {
+            await deleteTodo(id);
+            li.remove();
+          } catch (err) {
+            console.error("Fejl ved automatisk sletning:", err);
+          }
+        }, 1000);
+      } else {
+        li.classList.remove("opacity-50", "italic");
+      }
     } catch (error) {
-      console.error("Fejl ved toggle:", error);
+      console.error("Fejl ved toggling:", error);
     }
   }
 });
 
-// Events
 addButton.addEventListener("click", addTask);
 inputBox.addEventListener("keypress", (e) => {
   if (e.key === "Enter") addTask();
 });
 
-// Init
 document.addEventListener("DOMContentLoaded", () => {
   loadTodos();
   populateFriendDropdown();
 });
 
-// Lyt efter realtidsdata
 socket.on("new-todo", (todo) => {
   if (!document.querySelector(`li[data-id="${todo._id}"]`)) {
     createListItem(todo);

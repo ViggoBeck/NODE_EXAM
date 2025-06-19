@@ -1,21 +1,42 @@
 <main class="p-4 max-w-2xl mx-auto">
-    <h1 class="text-2xl font-bold mb-4">👥 Dine venner</h1>
-
-    <section id="friend-list" class="mb-6">
-      <h2 class="text-lg font-semibold">✅ Venner</h2>
-      <ul id="friends"></ul>
-    </section>
-
-    <section id="requests-section" class="mb-6">
-      <h2 class="text-lg font-semibold">📨 Venneanmodninger</h2>
-      <ul id="requests"></ul>
-    </section>
-
-    <section id="search-section">
-      <h2 class="text-lg font-semibold">🔍 Søg og tilføj ven</h2>
-      <input id="search-username" type="text" placeholder="Søg brugernavn..." class="border p-2 w-full mb-2" />
-      <button id="send-request" class="bg-blue-500 text-white px-4 py-2 rounded">Send anmodning</button>
-      <p id="search-message" class="mt-2 text-sm"></p>
-    </section>
+  <section class="max-w-5xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-8 flex items-center gap-2">
+      👥 <span>Dine venner</span>
+    </h1>
+  
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Venner -->
+      <div class="bg-white shadow rounded p-4">
+        <h2 class="text-xl font-semibold mb-3">✅ Venner</h2>
+        <ul id="friends" class="space-y-1 text-gray-800 list-disc pl-4"></ul>
+      </div>
+  
+      <!-- Anmodninger -->
+      <div class="bg-white shadow rounded p-4">
+        <h2 class="text-xl font-semibold mb-3">📩 Venneanmodninger</h2>
+        <ul id="requests" class="space-y-2 text-gray-800"></ul>
+      </div>
+    </div>
+  
+    <!-- Søg og tilføj -->
+    <div class="mt-10 bg-white shadow rounded p-4">
+      <h2 class="text-xl font-semibold mb-4">🔍 Søg og tilføj ven</h2>
+  
+      <div class="flex flex-col gap-2 max-w-md">
+        <input id="search-username" type="text" placeholder="Søg brugernavn..."
+          class="border border-gray-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
+  
+        <ul id="suggestions"
+          class="bg-white shadow rounded border border-gray-200 max-h-40 overflow-auto hidden text-sm"></ul>
+  
+        <button id="send-request"
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition w-fit">
+          Send anmodning
+        </button>
+  
+        <p id="search-message" class="text-sm text-gray-600 mt-1"></p>
+      </div>
+    </div>
+  </section>  
 </main>
 

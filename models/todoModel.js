@@ -22,6 +22,10 @@ const todoSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  comment: {
+    type: String,
+    default: ""
+  },
   sharedWith: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
