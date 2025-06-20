@@ -1,3 +1,4 @@
+// Importerer funktioner til håndtering af to-dos
 import {
   fetchTodos,
   createTodo,
@@ -5,7 +6,7 @@ import {
   deleteTodo
 } from '../todo/todoFetch.js';
 
-// Ny helper: Hent venner
+// Henter brugerens venner
 async function fetchFriends() {
   const res = await fetch("/api/friends");
   if (!res.ok) throw new Error("Kunne ikke hente venner");
@@ -13,6 +14,7 @@ async function fetchFriends() {
 }
 
 document.addEventListener("DOMContentLoaded", async function () {
+  // DOM-elementer
   const calendarEl = document.getElementById("calendar");
   const modal = document.getElementById("calendar-modal");
   const titleInput = document.getElementById("modal-title");
@@ -28,9 +30,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   const userId = document.body.dataset.userId;
 
   try {
+    // Henter to-dos og venner samtidig
     const [todos, friends] = await Promise.all([fetchTodos(), fetchFriends()]);
 
-    // Fyld venne-dropdown
+    // Fylder dropdown med venner
     friends.forEach(friend => {
       const opt = document.createElement("option");
       opt.value = friend._id;
@@ -38,6 +41,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       friendSelect.appendChild(opt);
     });
 
+    // Tegner kalenderen med filtrering
     function renderCalendar(selectedFriendId = "") {
       const filteredEvents = todos.filter(todo => {
         const todoUserId = typeof todo.user === "string" ? todo.user : todo.user._id;
@@ -46,6 +50,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const isSharedWithMe = todo.sharedWith?.includes(userId);
         const isSharedWithFriend = todo.sharedWith?.includes(selectedFriendId);
 
+        // Viser både egne, fælles og venners opgaver afhængigt af valg
         if (!selectedFriendId) {
           return isMine || isSharedWithMe;
         }
@@ -53,6 +58,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         return isMine || isFriends || isSharedWithMe || isSharedWithFriend;
       });
 
+      // Formatterer begivenheder til FullCalendar
       const events = filteredEvents.map(todo => {
         const todoUserId = typeof todo.user === "string" ? todo.user : todo.user._id;
         const isMine = todoUserId === userId;
@@ -75,6 +81,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         };
       });
 
+      // Initialiserer kalenderen
       const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: "dayGridMonth",
         headerToolbar: {
@@ -86,6 +93,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         selectable: true,
         events: events,
 
+        // Når man klikker på en opgave
         eventClick: function(info) {
           currentEvent = info.event;
 
@@ -104,6 +112,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           modal.classList.remove("hidden");
         },
 
+        // Træk og slip – opdaterer dato
         eventDrop: async function(info) {
           try {
             await updateTodo(info.event.id, { dueDate: info.event.start });
@@ -113,6 +122,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           }
         },
 
+        // Klik på tomt felt – opret ny opgave
         dateClick: function(info) {
           currentEvent = null;
           titleInput.value = "";
@@ -129,19 +139,22 @@ document.addEventListener("DOMContentLoaded", async function () {
       calendar.updateSize();
     }
 
-    // Init
+    // Starter kalenderen
     renderCalendar();
 
+    // Skift visning ved valg af ven
     friendSelect.addEventListener("change", () => {
       calendarEl.innerHTML = "";
       renderCalendar(friendSelect.value);
     });
 
+    // Gå til dags dato
     document.querySelector(".fc-today-button")?.addEventListener("click", () => {
       calendar.today();
       calendar.updateSize();
     });
 
+    // Luk modal ved klik udenfor
     modal.onclick = function (e) {
       if (e.target === modal) {
         modal.classList.add("hidden");
@@ -152,6 +165,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       modal.classList.add("hidden");
     });
 
+    // Gem opgave (nyt eller redigeret)
     saveBtn.onclick = async () => {
       const title = titleInput.value.trim();
       const dueDate = dateInput.value;
@@ -176,6 +190,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
     };
 
+    // Slet opgave
     deleteBtn.onclick = async () => {
       if (!currentEvent) return;
 

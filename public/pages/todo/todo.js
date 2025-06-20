@@ -1,3 +1,4 @@
+// Importerer funktioner til fetch og opdatering af to-dos og venner
 import {
   fetchTodos,
   createTodo,
@@ -7,18 +8,21 @@ import {
   fetchFriends
 } from './todoFetch.js';
 
+// Opretter forbindelse til Socket.IO og tilføjer bruger til egen room
 const socket = window.io();
 const userId = document.body.dataset.userId;
 if (userId) {
   socket.emit("join", userId);
 }
 
+// DOM-elementer
 const inputBox = document.getElementById("input-box");
 const dateInput = document.getElementById("date-input");
 const friendSelect = document.getElementById("friend-select");
 const addButton = document.getElementById("add-button");
 const listContainer = document.getElementById("todo-list-container");
 
+// Fylder dropdown med brugerens venner
 async function populateFriendDropdown() {
   try {
     const friends = await fetchFriends();
@@ -33,10 +37,10 @@ async function populateFriendDropdown() {
   }
 }
 
+// Opretter og tilføjer en <li> til DOM med to-do-data
 function createListItem(todo) {
   const li = document.createElement("li");
   li.dataset.id = todo._id;
-
   li.classList.add("transition-opacity", "duration-1000");
   if (todo.completed) li.classList.add("checked", "opacity-50", "italic");
 
@@ -59,9 +63,9 @@ function createListItem(todo) {
   wrapper.appendChild(date);
   li.appendChild(wrapper);
 
+  // Viser hvem opgaven er delt med eller fra hvem den kommer
   const sharedLabel = document.createElement("div");
   sharedLabel.className = "shared-label";
-
   if (todo.user && todo.user._id !== userId) {
     sharedLabel.textContent = `with: ${todo.user.username}`;
     li.appendChild(sharedLabel);
@@ -73,6 +77,7 @@ function createListItem(todo) {
     }
   }
 
+  // Tilføjer slet-knap
   const deleteBtn = document.createElement("span");
   deleteBtn.classList.add("delete");
   deleteBtn.textContent = "×";
@@ -81,6 +86,7 @@ function createListItem(todo) {
   listContainer.appendChild(li);
 }
 
+// Henter og viser alle to-dos
 async function loadTodos() {
   try {
     const todos = await fetchTodos();
@@ -92,6 +98,7 @@ async function loadTodos() {
   }
 }
 
+// Tilføjer ny opgave og deler den hvis valgt
 async function addTask() {
   const title = inputBox.value.trim();
   const dueDate = dateInput.value;
@@ -122,11 +129,13 @@ async function addTask() {
   }
 }
 
+// Håndterer klik på todo-liste (slet, rediger, marker færdig)
 listContainer.addEventListener("click", async (e) => {
   const li = e.target.closest("li");
   const id = li?.dataset.id;
   if (!id) return;
 
+  // Slet opgave
   if (e.target.classList.contains("delete")) {
     try {
       await deleteTodo(id);
@@ -137,6 +146,7 @@ listContainer.addEventListener("click", async (e) => {
     return;
   }
 
+  // Rediger opgave direkte
   if (e.target.classList.contains("todo-text")) {
     const currentText = e.target.textContent;
     const input = document.createElement("input");
@@ -167,6 +177,7 @@ listContainer.addEventListener("click", async (e) => {
     return;
   }
 
+  // Marker som færdig og slet automatisk efter 1 sekund
   if (e.target === li) {
     const isNowCompleted = !li.classList.contains("checked");
 
@@ -195,16 +206,19 @@ listContainer.addEventListener("click", async (e) => {
   }
 });
 
+// Tilføj ved klik eller tryk på enter
 addButton.addEventListener("click", addTask);
 inputBox.addEventListener("keypress", (e) => {
   if (e.key === "Enter") addTask();
 });
 
+// Initialiser siden
 document.addEventListener("DOMContentLoaded", () => {
   loadTodos();
   populateFriendDropdown();
 });
 
+// Realtime opdatering med Socket.IO
 socket.on("new-todo", (todo) => {
   if (!document.querySelector(`li[data-id="${todo._id}"]`)) {
     createListItem(todo);
